@@ -1,0 +1,3 @@
+-keep class com.nexdam.app.data.models.** { *; }
+-keepattributes *Annotation*
+-dontwarn kotlinx.serialization.**

@@ -1,0 +1,113 @@
+name: Release NexDam
+
+on:
+  push:
+    tags:
+      - 'v*'          # Si attiva quando crei un tag tipo v1.0.0
+  workflow_dispatch:  # Oppure manualmente da GitHub
+
+permissions:
+  contents: write
+
+jobs:
+
+  # ── Windows .msi ────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build MSI (Windows)
+        working-directory: desktop
+        run: ./gradlew packageMsi --no-daemon
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexDam-Windows
+          path: desktop/build/compose/binaries/main/msi/*.msi
+
+  # ── Linux .deb ──────────────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build DEB (Linux)
+        working-directory: desktop
+        run: ./gradlew packageDeb --no-daemon
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexDam-Linux
+          path: desktop/build/compose/binaries/main/deb/*.deb
+
+  # ── Android .aab ────────────────────────────────────────────
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Android Release AAB
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexDam-Android
+          path: android/app/build/outputs/bundle/release/*.aab
+
+  # ── Crea la GitHub Release con tutti i file ─────────────────
+  create-release:
+    needs: [build-windows, build-linux, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "NexDam ${{ github.ref_name }}"
+          body: |
+            ## 📦 Download NexDam Client
+
+            | Piattaforma | File |
+            |---|---|
+            | 🪟 Windows | `NexDam-*.msi` |
+            | 🐧 Linux | `NexDam-*.deb` |
+            | 🤖 Android | `app-release.aab` (Play Store) |
+
+            ### Installazione
+            - **Windows**: scarica e lancia il `.msi`
+            - **Linux**: `sudo dpkg -i NexDam-*.deb`
+            - **Android**: distribuito tramite Google Play
+          files: |
+            artifacts/NexDam-Windows/*.msi
+            artifacts/NexDam-Linux/*.deb
+            artifacts/NexDam-Android/*.aab
+          draft: false
+          prerelease: false

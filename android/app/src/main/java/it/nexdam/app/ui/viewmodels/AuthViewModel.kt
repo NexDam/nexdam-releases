@@ -1,0 +1,58 @@
+package it.nexdam.app.ui.viewmodels
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import it.nexdam.app.data.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+sealed class AuthState {
+    object Idle : AuthState()
+    object Loading : AuthState()
+    object Success : AuthState()
+    data class Error(val message: String) : AuthState()
+}
+
+class AuthViewModel : ViewModel() {
+
+    private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
+    val state: StateFlow<AuthState> = _state
+
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _state.value = AuthState.Loading
+            try {
+                supabase.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                _state.value = AuthState.Success
+            } catch (e: Exception) {
+                _state.value = AuthState.Error(e.message ?: "Login failed")
+            }
+        }
+    }
+
+    fun register(email: String, password: String, fullName: String) {
+        viewModelScope.launch {
+            _state.value = AuthState.Loading
+            try {
+                supabase.auth.signUpWith(Email) {
+                    this.email = email
+                    this.password = password
+                    data = kotlinx.serialization.json.buildJsonObject {
+                        put("full_name", kotlinx.serialization.json.JsonPrimitive(fullName))
+                    }
+                }
+                _state.value = AuthState.Success
+            } catch (e: Exception) {
+                _state.value = AuthState.Error(e.message ?: "Registration failed")
+            }
+        }
+    }
+
+    fun resetState() { _state.value = AuthState.Idle }
+}

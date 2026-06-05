@@ -1,0 +1,17 @@
+# Build outputs
+android/app/build/
+android/build/
+desktop/build/
+
+# Keystore (sicurezza)
+*.jks
+*.keystore
+
+# Local config
+*.local.properties
+local.properties
+.gradle/
+
+# IDE
+.idea/
+*.iml
