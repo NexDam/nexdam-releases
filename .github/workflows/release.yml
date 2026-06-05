@@ -2,9 +2,8 @@ name: Release NexDam
 
 on:
   push:
-    tags:
-      - 'v*'          # Si attiva quando crei un tag tipo v1.0.0
-  workflow_dispatch:  # Oppure manualmente da GitHub
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -53,7 +52,7 @@ jobs:
           name: NexDam-Linux
           path: desktop/build/compose/binaries/main/deb/*.deb
 
-  # ── Android .aab ────────────────────────────────────────────
+  # ── Android .apk ────────────────────────────────────────────
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -67,15 +66,15 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build Android Release AAB
+      - name: Build Android APK
         working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon
 
-      - name: Upload AAB artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: NexDam-Android
-          path: android/app/build/outputs/bundle/release/*.aab
+          path: android/app/build/outputs/apk/release/*.apk
 
   # ── Crea la GitHub Release con tutti i file ─────────────────
   create-release:
@@ -90,24 +89,25 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "NexDam ${{ github.ref_name }}"
+          tag_name: latest
+          name: "NexDam - Ultima versione"
           body: |
             ## 📦 Download NexDam Client
 
             | Piattaforma | File |
             |---|---|
-            | 🪟 Windows | `NexDam-*.msi` |
-            | 🐧 Linux | `NexDam-*.deb` |
-            | 🤖 Android | `app-release.aab` (Play Store) |
+            | 🪟 Windows | `NexDam-1.0.0.msi` |
+            | 🐧 Linux | `nexdam_1.0.0_amd64.deb` |
+            | 🤖 Android | `app-release.apk` |
 
             ### Installazione
             - **Windows**: scarica e lancia il `.msi`
-            - **Linux**: `sudo dpkg -i NexDam-*.deb`
-            - **Android**: distribuito tramite Google Play
+            - **Linux**: `sudo dpkg -i nexdam_1.0.0_amd64.deb`
+            - **Android**: scarica e installa l'`.apk`
           files: |
             artifacts/NexDam-Windows/*.msi
             artifacts/NexDam-Linux/*.deb
-            artifacts/NexDam-Android/*.aab
+            artifacts/NexDam-Android/*.apk
+          make_latest: true
           draft: false
           prerelease: false
