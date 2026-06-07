@@ -23,6 +23,9 @@
 		A014 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F014 /* DashboardViewModel.swift */; };
 		A015 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F015 /* SupabaseManager.swift */; };
 		A016 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = F016 /* Models.swift */; };
+		A017 /* BlogModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F018 /* BlogModels.swift */; };
+		A018 /* BlogAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F019 /* BlogAPI.swift */; };
+		A019 /* BlogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F020 /* BlogViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +46,9 @@
 		F015 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		F016 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		F017 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F018 /* BlogModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlogModels.swift; sourceTree = "<group>"; };
+		F019 /* BlogAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlogAPI.swift; sourceTree = "<group>"; };
+		F020 /* BlogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlogViewModel.swift; sourceTree = "<group>"; };
 		PROD /* NexDam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NexDam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -108,6 +114,7 @@
 			children = (
 				F013 /* AuthViewModel.swift */,
 				F014 /* DashboardViewModel.swift */,
+				F020 /* BlogViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -116,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				F016 /* Models.swift */,
+				F018 /* BlogModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -124,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				F015 /* SupabaseManager.swift */,
+				F019 /* BlogAPI.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -226,6 +235,9 @@
 				A014 /* DashboardViewModel.swift in Sources */,
 				A015 /* SupabaseManager.swift in Sources */,
 				A016 /* Models.swift in Sources */,
+				A017 /* BlogModels.swift in Sources */,
+				A018 /* BlogAPI.swift in Sources */,
+				A019 /* BlogViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
