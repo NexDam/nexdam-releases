@@ -30,6 +30,7 @@ fun MainScreen(vm: AppViewModel, onLogout: () -> Unit) {
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
     var showProfile by remember { mutableStateOf(false) }
+    var showBlog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { vm.loadData() }
 
@@ -66,6 +67,22 @@ fun MainScreen(vm: AppViewModel, onLogout: () -> Unit) {
             }
 
             HorizontalDivider(color = Divider, thickness = 0.5.dp)
+
+            // Blog entry
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (showBlog) Primary.copy(alpha = 0.08f) else androidx.compose.ui.graphics.Color.Transparent)
+                    .clickable { showBlog = true; vm.clearSelectedProject() }
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Article, contentDescription = null, tint = if (showBlog) Primary else Muted, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Blog", color = if (showBlog) Primary else OnBg, fontSize = 13.sp, fontWeight = if (showBlog) FontWeight.SemiBold else FontWeight.Normal)
+            }
+
+            HorizontalDivider(color = Divider, thickness = 0.5.dp)
             Spacer(Modifier.height(8.dp))
 
             // Projects section
@@ -97,7 +114,7 @@ fun MainScreen(vm: AppViewModel, onLogout: () -> Unit) {
                         SidebarProjectItem(
                             project = project,
                             isSelected = selectedProject?.id == project.id,
-                            onClick = { vm.selectProject(project) }
+                            onClick = { vm.selectProject(project); showBlog = false }
                         )
                     }
                 }
@@ -141,6 +158,8 @@ fun MainScreen(vm: AppViewModel, onLogout: () -> Unit) {
         Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
             if (showProfile) {
                 ProfilePanel(profile = profile, onClose = { showProfile = false })
+            } else if (showBlog) {
+                BlogPanel(onClose = { showBlog = false })
             } else if (selectedProject != null) {
                 ProjectPanel(
                     project = selectedProject!!,

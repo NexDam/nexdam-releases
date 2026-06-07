@@ -13,6 +13,7 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object Dashboard : Screen("dashboard")
     object Profile : Screen("profile")
+    object Blog : Screen("blog")
     object Project : Screen("project/{projectId}") {
         fun createRoute(id: String) = "project/$id"
     }
@@ -47,8 +48,13 @@ fun NexDamNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onProjectClick = { id -> navController.navigate(Screen.Project.createRoute(id)) },
-                onProfileClick = { navController.navigate(Screen.Profile.route) }
+                onProfileClick = { navController.navigate(Screen.Profile.route) },
+                onBlogClick = { navController.navigate(Screen.Blog.route) }
             )
+        }
+
+        composable(Screen.Blog.route) {
+            BlogScreen(onBack = { navController.popBackStack() })
         }
 
         composable(

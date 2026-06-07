@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -29,6 +30,7 @@ import it.nexdam.app.ui.viewmodels.DashboardViewModel
 fun DashboardScreen(
     onProjectClick: (String) -> Unit,
     onProfileClick: () -> Unit,
+    onBlogClick: () -> Unit = {},
     vm: DashboardViewModel = viewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
@@ -54,6 +56,9 @@ fun DashboardScreen(
                 actions = {
                     IconButton(onClick = { vm.loadProjects() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Aggiorna", tint = Muted)
+                    }
+                    IconButton(onClick = onBlogClick) {
+                        Icon(Icons.Default.Article, contentDescription = "Blog", tint = Muted)
                     }
                     IconButton(onClick = onProfileClick) {
                         Box(
