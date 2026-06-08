@@ -16,6 +16,9 @@ object DesktopNotifier {
 
     private var trayIcon: TrayIcon? = null
 
+    /** Immagine del logo usata sia per le notifiche tray sia per l'icona dell'app in tray. */
+    fun appIconImage(): BufferedImage = buildIconImage()
+
     private fun buildIconImage(): BufferedImage {
         val size = 32
         val image = BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)

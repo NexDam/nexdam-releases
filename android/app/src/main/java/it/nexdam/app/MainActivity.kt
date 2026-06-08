@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.navigation.compose.rememberNavController
 import it.nexdam.app.data.supabase
+import it.nexdam.app.notifications.DeviceTokenRegistrar
 import it.nexdam.app.notifications.MessageRealtimeWatcher
 import it.nexdam.app.ui.navigation.NexDamNavGraph
 import it.nexdam.app.ui.navigation.Screen
@@ -61,6 +62,15 @@ class MainActivity : ComponentActivity() {
                             val userId = supabase.auth.currentUserOrNull()?.id
                             if (userId != null) {
                                 MessageRealtimeWatcher.start(applicationContext, userId)
+                                // Registra il token FCM del dispositivo: permette di ricevere
+                                // le notifiche push anche ad app completamente chiusa.
+                                launch {
+                                    try {
+                                        DeviceTokenRegistrar.syncCurrentToken(userId)
+                                    } catch (_: Exception) {
+                                        // rete assente o permesso Google Play Services mancante: si ritenterà al prossimo avvio
+                                    }
+                                }
                             }
                         }
                         is SessionStatus.NotAuthenticated -> {

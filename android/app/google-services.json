@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "568133435203",
+    "project_id": "nexdam-afe2d",
+    "storage_bucket": "nexdam-afe2d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568133435203:android:5f6795667433d98f8eb9f6",
+        "android_client_info": {
+          "package_name": "nexdam.it"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4ny1U-m54hmtXHCgduGj6_pzUrVPnqX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

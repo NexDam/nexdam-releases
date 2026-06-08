@@ -15,3 +15,6 @@ local.properties
 # IDE
 .idea/
 *.iml
+
+# Supabase CLI local state
+supabase/.temp/
