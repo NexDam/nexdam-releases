@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:568133435203:android:2f3071a26a76fc6c8eb9f6",
+        "android_client_info": {
+          "package_name": "it.nexdam.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4ny1U-m54hmtXHCgduGj6_pzUrVPnqX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:568133435203:android:5f6795667433d98f8eb9f6",
         "android_client_info": {
           "package_name": "nexdam.it"
