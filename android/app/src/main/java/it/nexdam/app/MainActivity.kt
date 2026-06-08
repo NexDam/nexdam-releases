@@ -18,6 +18,7 @@ import it.nexdam.app.ui.navigation.Screen
 import it.nexdam.app.ui.theme.NexDamTheme
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
