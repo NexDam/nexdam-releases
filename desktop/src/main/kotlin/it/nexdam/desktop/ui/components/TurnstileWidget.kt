@@ -2,6 +2,7 @@ package it.nexdam.desktop.ui.components
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -13,7 +14,6 @@ import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
 import javafx.scene.paint.Color
 import javafx.scene.web.WebView
-import netscape.javascript.JSObject
 
 /**
  * Site key pubblica di Cloudflare Turnstile usata per la protezione CAPTCHA
@@ -95,8 +95,15 @@ fun TurnstileWidget(
                 engine.isJavaScriptEnabled = true
                 engine.loadWorker.stateProperty().addListener { _, _, newState ->
                     if (newState == Worker.State.SUCCEEDED) {
-                        val window = engine.executeScript("window") as JSObject
-                        window.setMember("javaBridge", bridge)
+                        // `netscape.javascript.JSObject` vive nel modulo JDK
+                        // `jdk.jsobject`, non esportato di default su un build
+                        // basato su classpath: chiamiamo `setMember` via
+                        // reflection per evitare la dipendenza a compile-time.
+                        val window = engine.executeScript("window")
+                        val setMember = window.javaClass.getMethod(
+                            "setMember", String::class.java, Any::class.java
+                        )
+                        setMember.invoke(window, "javaBridge", bridge)
                     }
                 }
                 engine.loadContent(turnstileHtml(siteKey), "text/html")
