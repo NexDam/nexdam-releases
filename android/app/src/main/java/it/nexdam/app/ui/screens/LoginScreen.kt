@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import it.nexdam.app.ui.components.TurnstileWidget
 import it.nexdam.app.ui.theme.*
 import it.nexdam.app.ui.viewmodels.AuthState
 import it.nexdam.app.ui.viewmodels.AuthViewModel
@@ -36,6 +37,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var captchaToken by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -134,6 +136,13 @@ fun LoginScreen(
                         shape = RoundedCornerShape(10.dp)
                     )
 
+                    Spacer(Modifier.height(12.dp))
+
+                    TurnstileWidget(
+                        modifier = Modifier.fillMaxWidth(),
+                        onToken = { captchaToken = it }
+                    )
+
                     if (state is AuthState.Error) {
                         Box(
                             modifier = Modifier
@@ -150,8 +159,8 @@ fun LoginScreen(
                     Spacer(Modifier.height(20.dp))
 
                     Button(
-                        onClick = { vm.login(email, password) },
-                        enabled = state !is AuthState.Loading && email.isNotBlank() && password.isNotBlank(),
+                        onClick = { vm.login(email, password, captchaToken) },
+                        enabled = state !is AuthState.Loading && email.isNotBlank() && password.isNotBlank() && captchaToken != null,
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Primary),
                         shape = RoundedCornerShape(10.dp)

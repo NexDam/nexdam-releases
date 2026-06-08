@@ -22,13 +22,14 @@ class AuthViewModel {
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state: StateFlow<AuthState> = _state
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, captchaToken: String?) {
         scope.launch {
             _state.value = AuthState.Loading
             try {
                 supabase.auth.signInWith(Email) {
                     this.email = email
                     this.password = password
+                    this.captchaToken = captchaToken
                 }
                 _state.value = AuthState.Success
             } catch (e: Exception) {

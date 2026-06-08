@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import it.nexdam.app.ui.components.TurnstileWidget
 import it.nexdam.app.ui.theme.*
 import it.nexdam.app.ui.viewmodels.AuthState
 import it.nexdam.app.ui.viewmodels.AuthViewModel
@@ -38,6 +39,7 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var showEmailConfirm by remember { mutableStateOf(false) }
+    var captchaToken by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -154,6 +156,13 @@ fun RegisterScreen(
             colors = nexDamTextFieldColors()
         )
 
+        Spacer(Modifier.height(12.dp))
+
+        TurnstileWidget(
+            modifier = Modifier.fillMaxWidth(),
+            onToken = { captchaToken = it }
+        )
+
         if (state is AuthState.Error) {
             Text(
                 (state as AuthState.Error).message,
@@ -166,8 +175,10 @@ fun RegisterScreen(
         Spacer(Modifier.height(24.dp))
 
         Button(
-            onClick = { vm.register(email, password, fullName) },
-            enabled = state !is AuthState.Loading,
+            onClick = { vm.register(email, password, fullName, captchaToken) },
+            enabled = state !is AuthState.Loading &&
+                fullName.isNotBlank() && email.isNotBlank() && password.isNotBlank() &&
+                captchaToken != null,
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary),
             shape = RoundedCornerShape(10.dp)

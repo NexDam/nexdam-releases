@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.nexdam.desktop.ui.components.TurnstileWidget
 import it.nexdam.desktop.ui.theme.*
 import it.nexdam.desktop.ui.viewmodels.AuthState
 import it.nexdam.desktop.ui.viewmodels.AuthViewModel
@@ -27,6 +28,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit, vm: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var captchaToken by remember { mutableStateOf<String?>(null) }
+
+    fun attemptLogin() {
+        if (captchaToken != null) vm.login(email, password, captchaToken)
+    }
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -116,11 +122,18 @@ fun LoginScreen(onLoginSuccess: () -> Unit, vm: AuthViewModel) {
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth().onKeyEvent {
                         if (it.type == KeyEventType.KeyUp && it.key == Key.Enter) {
-                            vm.login(email, password); true
+                            attemptLogin(); true
                         } else false
                     },
                     colors = fieldColors(),
                     shape = RoundedCornerShape(10.dp)
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                TurnstileWidget(
+                    modifier = Modifier.fillMaxWidth(),
+                    onToken = { captchaToken = it }
                 )
 
                 if (state is AuthState.Error) {
@@ -139,8 +152,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, vm: AuthViewModel) {
                 Spacer(Modifier.height(24.dp))
 
                 Button(
-                    onClick = { vm.login(email, password) },
-                    enabled = state !is AuthState.Loading && email.isNotBlank() && password.isNotBlank(),
+                    onClick = { attemptLogin() },
+                    enabled = state !is AuthState.Loading && email.isNotBlank() && password.isNotBlank() && captchaToken != null,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     shape = RoundedCornerShape(10.dp)

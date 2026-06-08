@@ -21,13 +21,14 @@ class AuthViewModel : ViewModel() {
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state: StateFlow<AuthState> = _state
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, captchaToken: String?) {
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
                 supabase.auth.signInWith(Email) {
                     this.email = email
                     this.password = password
+                    this.captchaToken = captchaToken
                 }
                 _state.value = AuthState.Success
             } catch (e: Exception) {
@@ -36,13 +37,14 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String, fullName: String) {
+    fun register(email: String, password: String, fullName: String, captchaToken: String?) {
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
                 supabase.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
+                    this.captchaToken = captchaToken
                     data = kotlinx.serialization.json.buildJsonObject {
                         put("full_name", kotlinx.serialization.json.JsonPrimitive(fullName))
                     }

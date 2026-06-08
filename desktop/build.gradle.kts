@@ -6,6 +6,14 @@ plugins {
     id("org.jetbrains.compose") version "1.7.3"
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.10"
     kotlin("plugin.serialization") version "2.1.10"
+    id("org.openjfx.javafxplugin") version "0.1.0"
+}
+
+javafx {
+    // WebView (motore WebKit) per mostrare il widget Cloudflare Turnstile
+    // richiesto da Supabase Auth per login/registrazione.
+    version = "21.0.2"
+    modules("javafx.web", "javafx.swing")
 }
 
 group = "it.nexdam"
