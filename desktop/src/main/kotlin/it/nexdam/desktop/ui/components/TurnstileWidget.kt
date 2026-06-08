@@ -2,18 +2,21 @@ package it.nexdam.desktop.ui.components
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.unit.dp
+import com.sun.net.httpserver.HttpServer
 import javafx.application.Platform
 import javafx.concurrent.Worker
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
 import javafx.scene.paint.Color
 import javafx.scene.web.WebView
+import java.net.InetSocketAddress
 
 /**
  * Site key pubblica di Cloudflare Turnstile usata per la protezione CAPTCHA
@@ -71,6 +74,30 @@ class TurnstileBridge(private val onToken: (String?) -> Unit) {
 }
 
 /**
+ * Avvia un mini server HTTP locale (solo su 127.0.0.1, porta effimera) che
+ * serve l'HTML del widget Turnstile su `http://localhost:<porta>/`.
+ *
+ * Serve perché `WebEngine.loadContent(...)` non permette di impostare un
+ * base URL fittizio (l'origine risulterebbe nulla/`about:blank`, rifiutata
+ * da Cloudflare con l'errore 110200 "dominio non autorizzato"). Caricando
+ * invece da un vero indirizzo `http://localhost:...`, il widget vede
+ * un'origine valida — Cloudflare Turnstile supporta esplicitamente
+ * `localhost` come dominio autorizzato per lo sviluppo locale, indipendentemente
+ * dalla porta usata.
+ */
+private fun startLocalTurnstileServer(siteKey: String): HttpServer {
+    val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+    val html = turnstileHtml(siteKey).toByteArray(Charsets.UTF_8)
+    server.createContext("/") { exchange ->
+        exchange.responseHeaders.add("Content-Type", "text/html; charset=utf-8")
+        exchange.sendResponseHeaders(200, html.size.toLong())
+        exchange.responseBody.use { it.write(html) }
+    }
+    server.start()
+    return server
+}
+
+/**
  * Mostra il widget Cloudflare Turnstile (CAPTCHA) richiesto da Supabase Auth
  * per login e registrazione, incorporato tramite JavaFX WebView (motore
  * WebKit) — Compose Desktop non ha un WebView nativo. Una volta risolto,
@@ -84,6 +111,13 @@ fun TurnstileWidget(
 ) {
     val currentOnToken by rememberUpdatedState(onToken)
     val bridge = remember { TurnstileBridge { currentOnToken(it) } }
+    val server = remember { startLocalTurnstileServer(siteKey) }
+
+    DisposableEffect(Unit) {
+        onDispose { server.stop(0) }
+    }
+
+    val port = (server.address as InetSocketAddress).port
 
     SwingPanel(
         modifier = modifier.height(90.dp),
@@ -106,7 +140,7 @@ fun TurnstileWidget(
                         setMember.invoke(window, "javaBridge", bridge)
                     }
                 }
-                engine.loadContent(turnstileHtml(siteKey), "text/html")
+                engine.load("http://localhost:$port/")
                 val scene = Scene(webView)
                 scene.fill = Color.TRANSPARENT
                 jfxPanel.scene = scene

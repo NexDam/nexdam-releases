@@ -20,6 +20,16 @@ import androidx.compose.ui.viewinterop.AndroidView
  */
 const val TURNSTILE_SITE_KEY = "0x4AAAAAADgtYXtPGUWVr663"
 
+/**
+ * Base URL "fittizia" usata per caricare il widget: deve corrispondere a uno
+ * dei domini autorizzati per la site key Turnstile (nexdam.it / www.nexdam.it),
+ * altrimenti Cloudflare rifiuta la verifica con l'errore 110200
+ * "dominio non autorizzato". `loadDataWithBaseURL` non esegue una vera
+ * richiesta di rete per la pagina: imposta solo l'origine/Referer visti dal
+ * widget e dalle chiamate verso challenges.cloudflare.com.
+ */
+private const val TURNSTILE_BASE_URL = "https://nexdam.it/"
+
 private fun turnstileHtml(siteKey: String): String = """
     <!DOCTYPE html>
     <html>
@@ -88,7 +98,7 @@ fun TurnstileWidget(
                     "NexDamCaptcha"
                 )
                 loadDataWithBaseURL(
-                    "https://challenges.cloudflare.com",
+                    TURNSTILE_BASE_URL,
                     turnstileHtml(siteKey),
                     "text/html",
                     "UTF-8",
