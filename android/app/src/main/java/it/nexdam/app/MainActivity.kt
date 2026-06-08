@@ -3,6 +3,7 @@ package it.nexdam.app
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -68,8 +69,10 @@ class MainActivity : ComponentActivity() {
                                 launch {
                                     try {
                                         DeviceTokenRegistrar.syncCurrentToken(userId)
-                                    } catch (_: Exception) {
+                                        Log.d("NexDamPush", "Token FCM registrato con successo per userId=$userId")
+                                    } catch (e: Exception) {
                                         // rete assente o permesso Google Play Services mancante: si ritenterà al prossimo avvio
+                                        Log.e("NexDamPush", "Registrazione token FCM fallita", e)
                                     }
                                 }
                             }
