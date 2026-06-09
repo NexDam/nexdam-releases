@@ -38,6 +38,7 @@ class DashboardViewModel : ViewModel() {
                         .decodeAs<Profile>()
                 } catch (_: Exception) { null }
 
+                val isAdmin = profile?.role == "admin"
                 val projects = supabase.postgrest["projects"]
                     .select(Columns.raw("""
                         id, title, description, status, created_at,
@@ -45,7 +46,8 @@ class DashboardViewModel : ViewModel() {
                         project_files(id, name),
                         invoices(id, status, amount, currency)
                     """.trimIndent())) {
-                        filter { eq("client_id", userId) }
+                        // L'admin vede tutti i progetti; il cliente solo i propri.
+                        if (!isAdmin) filter { eq("client_id", userId) }
                     }.decodeList<Project>()
 
                 _uiState.value = DashboardUiState.Success(projects, profile)

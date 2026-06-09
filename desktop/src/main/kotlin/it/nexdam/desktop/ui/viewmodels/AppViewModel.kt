@@ -48,7 +48,8 @@ class AppViewModel {
                         .decodeAs<Profile>()
                 } catch (_: Exception) {}
 
-                // Load projects
+                // Load projects — l'admin vede tutti, il cliente solo i propri.
+                val isAdmin = _profile.value?.role == "admin"
                 _projects.value = supabase.postgrest["projects"]
                     .select(Columns.raw("""
                         id, title, description, status, created_at,
@@ -56,7 +57,7 @@ class AppViewModel {
                         project_files(id, name),
                         invoices(id, status, amount, currency)
                     """.trimIndent())) {
-                        filter { eq("client_id", userId) }
+                        if (!isAdmin) filter { eq("client_id", userId) }
                     }.decodeList<Project>()
 
             } catch (e: Exception) {
@@ -96,11 +97,19 @@ class AppViewModel {
             _sendingMessage.value = true
             try {
                 val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
+                // Determina se chi scrive è admin per impostare is_admin correttamente
+                // (i messaggi admin fanno scattare la push notification al cliente).
+                val senderIsAdmin = try {
+                    supabase.postgrest["profiles"]
+                        .select { filter { eq("id", userId) }; limit(1); single() }
+                        .decodeAs<Profile>().role == "admin"
+                } catch (_: Exception) { false }
+
                 supabase.postgrest["project_messages"].insert(
                     buildJsonObject {
                         put("project_id", projectId)
                         put("sender_id", userId)
-                        put("is_admin", false)
+                        put("is_admin", senderIsAdmin)
                         put("body", body.trim())
                     }
                 )
