@@ -8,6 +8,8 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 
 sealed class AuthState {
     object Idle : AuthState()
@@ -37,7 +39,15 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String, fullName: String, captchaToken: String?) {
+    fun register(
+        email: String,
+        password: String,
+        fullName: String,
+        username: String,
+        company: String,
+        phone: String,
+        captchaToken: String?
+    ) {
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
@@ -45,8 +55,11 @@ class AuthViewModel : ViewModel() {
                     this.email = email
                     this.password = password
                     this.captchaToken = captchaToken
-                    data = kotlinx.serialization.json.buildJsonObject {
-                        put("full_name", kotlinx.serialization.json.JsonPrimitive(fullName))
+                    data = buildJsonObject {
+                        put("full_name", JsonPrimitive(fullName))
+                        put("username", JsonPrimitive(username.trim()))
+                        if (company.isNotBlank()) put("company", JsonPrimitive(company.trim()))
+                        if (phone.isNotBlank()) put("phone", JsonPrimitive(phone.trim()))
                     }
                 }
                 _state.value = AuthState.Success

@@ -2,13 +2,12 @@ package it.nexdam.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,12 +33,27 @@ fun RegisterScreen(
     vm: AuthViewModel = viewModel()
 ) {
     val state by vm.state.collectAsState()
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var fullName       by remember { mutableStateOf("") }
+    var username       by remember { mutableStateOf("") }
+    var email          by remember { mutableStateOf("") }
+    var password       by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var company        by remember { mutableStateOf("") }
+    var phone          by remember { mutableStateOf("") }
+    var passwordVisible        by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var showEmailConfirm by remember { mutableStateOf(false) }
-    var captchaToken by remember { mutableStateOf<String?>(null) }
+    var captchaToken   by remember { mutableStateOf<String?>(null) }
+
+    val passwordMismatch = confirmPassword.isNotBlank() && password != confirmPassword
+
+    val canSubmit = state !is AuthState.Loading
+        && fullName.isNotBlank()
+        && username.isNotBlank()
+        && email.isNotBlank()
+        && password.isNotBlank()
+        && password == confirmPassword
+        && captchaToken != null
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -48,12 +62,10 @@ fun RegisterScreen(
         }
     }
 
+    // ── Schermata "Controlla la tua email" ────────────────────────────────────
     if (showEmailConfirm) {
-        // Schermata "Controlla la tua email"
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background),
+            modifier = Modifier.fillMaxSize().background(Background),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -67,28 +79,14 @@ fun RegisterScreen(
                         .background(Primary.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Email,
-                        contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier.size(40.dp)
-                    )
+                    Icon(Icons.Default.Email, contentDescription = null, tint = Primary, modifier = Modifier.size(40.dp))
                 }
-
                 Spacer(Modifier.height(24.dp))
-                Text(
-                    "Controlla la tua email",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = OnBackground
-                )
+                Text("Controlla la tua email", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = OnBackground)
                 Spacer(Modifier.height(12.dp))
                 Text(
                     "Abbiamo inviato un link di conferma a:\n$email\n\nClicca il link per attivare il tuo account, poi accedi.",
-                    fontSize = 14.sp,
-                    color = Muted,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 22.sp
+                    fontSize = 14.sp, color = Muted, textAlign = TextAlign.Center, lineHeight = 22.sp
                 )
                 Spacer(Modifier.height(32.dp))
                 Button(
@@ -96,44 +94,62 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("Vai al Login", fontWeight = FontWeight.Bold)
-                }
+                ) { Text("Vai al Login", fontWeight = FontWeight.Bold) }
             }
         }
         return
     }
 
+    // ── Form di registrazione ─────────────────────────────────────────────────
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Crea account", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = OnBackground)
-        Text("NexDam Client Portal", fontSize = 14.sp, color = Muted, modifier = Modifier.padding(bottom = 32.dp))
+        Text("NexDam Client Portal", fontSize = 14.sp, color = Muted, modifier = Modifier.padding(bottom = 28.dp, top = 2.dp))
 
+        // Nome completo
         OutlinedTextField(
             value = fullName,
             onValueChange = { fullName = it },
             label = { Text("Nome completo") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = nexDamTextFieldColors()
         )
         Spacer(Modifier.height(12.dp))
+
+        // Username
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            leadingIcon = { Icon(Icons.Default.AccountCircle, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = nexDamTextFieldColors()
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // Email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
+            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
             colors = nexDamTextFieldColors()
         )
         Spacer(Modifier.height(12.dp))
+
+        // Password
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -143,9 +159,7 @@ fun RegisterScreen(
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null,
-                        tint = Muted,
-                        modifier = Modifier.size(18.dp)
+                        contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)
                     )
                 }
             },
@@ -155,19 +169,68 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             colors = nexDamTextFieldColors()
         )
-
         Spacer(Modifier.height(12.dp))
 
-        TurnstileWidget(
+        // Conferma password
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Conferma password") },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
+            trailingIcon = {
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    Icon(
+                        if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)
+                    )
+                }
+            },
+            singleLine = true,
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isError = passwordMismatch,
+            supportingText = if (passwordMismatch) {
+                { Text("Le password non coincidono", color = Error, fontSize = 12.sp) }
+            } else null,
             modifier = Modifier.fillMaxWidth(),
-            onToken = { captchaToken = it }
+            colors = nexDamTextFieldColors()
         )
+        Spacer(Modifier.height(12.dp))
 
+        // Azienda (opzionale)
+        OutlinedTextField(
+            value = company,
+            onValueChange = { company = it },
+            label = { Text("Azienda (opzionale)") },
+            leadingIcon = { Icon(Icons.Default.Business, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = nexDamTextFieldColors()
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // Telefono (opzionale)
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Telefono (opzionale)") },
+            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
+            placeholder = { Text("+39 …", color = Muted) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            modifier = Modifier.fillMaxWidth(),
+            colors = nexDamTextFieldColors()
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // CAPTCHA Turnstile
+        TurnstileWidget(modifier = Modifier.fillMaxWidth(), onToken = { captchaToken = it })
+
+        // Errore
         if (state is AuthState.Error) {
             Text(
                 (state as AuthState.Error).message,
-                color = Error,
-                fontSize = 13.sp,
+                color = Error, fontSize = 13.sp,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
@@ -175,10 +238,8 @@ fun RegisterScreen(
         Spacer(Modifier.height(24.dp))
 
         Button(
-            onClick = { vm.register(email, password, fullName, captchaToken) },
-            enabled = state !is AuthState.Loading &&
-                fullName.isNotBlank() && email.isNotBlank() && password.isNotBlank() &&
-                captchaToken != null,
+            onClick = { vm.register(email, password, fullName, username, company, phone, captchaToken) },
+            enabled = canSubmit,
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary),
             shape = RoundedCornerShape(10.dp)
@@ -195,5 +256,7 @@ fun RegisterScreen(
         TextButton(onClick = onGoToLogin) {
             Text("Hai già un account? Accedi", color = Primary)
         }
+
+        Spacer(Modifier.height(16.dp))
     }
 }
