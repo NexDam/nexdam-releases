@@ -7,6 +7,9 @@ desktop/build/
 *.jks
 *.keystore
 
+# Firebase — contiene Google API Key, fornito via secret CI (GOOGLE_SERVICES_JSON_BASE64)
+android/app/google-services.json
+
 # Local config
 *.local.properties
 local.properties
