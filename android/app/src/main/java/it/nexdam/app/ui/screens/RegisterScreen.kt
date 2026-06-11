@@ -33,7 +33,6 @@ fun RegisterScreen(
     vm: AuthViewModel = viewModel()
 ) {
     val state by vm.state.collectAsState()
-    var fullName       by remember { mutableStateOf("") }
     var username       by remember { mutableStateOf("") }
     var email          by remember { mutableStateOf("") }
     var password       by remember { mutableStateOf("") }
@@ -48,7 +47,6 @@ fun RegisterScreen(
     val passwordMismatch = confirmPassword.isNotBlank() && password != confirmPassword
 
     val canSubmit = state !is AuthState.Loading
-        && fullName.isNotBlank()
         && username.isNotBlank()
         && email.isNotBlank()
         && password.isNotBlank()
@@ -111,18 +109,6 @@ fun RegisterScreen(
     ) {
         Text("Crea account", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = OnBackground)
         Text("NexDam Client Portal", fontSize = 14.sp, color = Muted, modifier = Modifier.padding(bottom = 28.dp, top = 2.dp))
-
-        // Nome completo
-        OutlinedTextField(
-            value = fullName,
-            onValueChange = { fullName = it },
-            label = { Text("Nome completo") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Muted, modifier = Modifier.size(18.dp)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            colors = nexDamTextFieldColors()
-        )
-        Spacer(Modifier.height(12.dp))
 
         // Username
         OutlinedTextField(
@@ -238,7 +224,7 @@ fun RegisterScreen(
         Spacer(Modifier.height(24.dp))
 
         Button(
-            onClick = { vm.register(email, password, fullName, username, company, phone, captchaToken) },
+            onClick = { vm.register(email, password, username, company, phone, captchaToken) },
             enabled = canSubmit,
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary),

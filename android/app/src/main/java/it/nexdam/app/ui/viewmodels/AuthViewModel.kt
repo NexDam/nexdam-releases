@@ -42,7 +42,6 @@ class AuthViewModel : ViewModel() {
     fun register(
         email: String,
         password: String,
-        fullName: String,
         username: String,
         company: String,
         phone: String,
@@ -56,7 +55,6 @@ class AuthViewModel : ViewModel() {
                     this.password = password
                     this.captchaToken = captchaToken
                     data = buildJsonObject {
-                        put("full_name", JsonPrimitive(fullName))
                         put("username", JsonPrimitive(username.trim()))
                         if (company.isNotBlank()) put("company", JsonPrimitive(company.trim()))
                         if (phone.isNotBlank()) put("phone", JsonPrimitive(phone.trim()))
